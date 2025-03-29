@@ -14,8 +14,8 @@ app.use(express.json());
 
 // 
     
-  nodeCron.schedule('0 * * * *', async () => {
-    console.log('Running task every 2 minutes...'); // Logs the task execution
+  nodeCron.schedule('0 0 * * 0', async () => {
+    console.log('This task runs every Sunday at midnight.');// Logs the task execution
   
     // Generate the Excel file and wait for the result
     const excelFilePath = await generateExcel();

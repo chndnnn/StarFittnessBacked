@@ -36,6 +36,21 @@ const userSchema = new Schema(
       type: Date,
       required: [true, 'End date is required'],
     },
+    paymentMode: {
+      type: String,
+      enum: ['Online', 'Cash'], 
+      default: 'Online',  
+      required: [true, 'Payment mode is required'],
+    },
+    dueAmount: {
+      type: Number,
+      default: 0,
+      min: [0, 'Due amount cannot be negative'],
+    },
+    description: {
+      type: String,
+      default: '',
+    },
     createdAt: {
       type: Date,
       default: Date.now,

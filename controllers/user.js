@@ -3,7 +3,7 @@ import moment from "moment";
 
 export const getAllUsers = async (req, res) => {
   try {
-    const users = await User.find();
+    const users = await User.find().sort({ updatedAt: -1 });;
     res.status(200).json(users); 
   } catch (err) {
     console.error('Error fetching users:', err);
@@ -13,7 +13,7 @@ export const getAllUsers = async (req, res) => {
 
 export const createUser = async (req, res) => {
     try {
-      const { name, number, address, price, startDate, subscriptionDuration, endDate } = req.body;
+      const { name, number, address, price, startDate, subscriptionDuration, endDate,paymentMode,dueAmount,description } = req.body;
   
       const newUser = new User({
         name,
@@ -23,6 +23,9 @@ export const createUser = async (req, res) => {
         startDate,
         subscriptionDuration,
         endDate,
+        paymentMode,
+        dueAmount,
+        description
       });
   
       await newUser.save();
@@ -47,10 +50,10 @@ export const createUser = async (req, res) => {
       // Find users whose 'endDate' is in the next 3 days and is not already expired
       const users = await User.find({
         endDate: { 
-          $gte: today.toDate(), // endDate should be greater than or equal to today's date (not expired)
-          $lte: threeDaysFromNow // endDate should be less than or equal to 3 days from now
+          $gte: today.toDate(), 
+          $lte: threeDaysFromNow 
         },
-      });
+      }).sort({ updatedAt: -1 });
   
       res.status(200).json(users);
     } catch (err) {
@@ -66,8 +69,8 @@ export const createUser = async (req, res) => {
       const today = moment().startOf('day').toDate(); // Get today's date at midnight
   
       const users = await User.find({
-        endDate: { $lt: today }, // endDate < today
-      });
+        endDate: { $lt: today }, 
+      }).sort({ updatedAt: -1 });
   
       res.status(200).json(users);
     } catch (err) {
@@ -106,7 +109,7 @@ export const updateUser = async (req, res) => {
     const { id } = req.params;
 
     // Extract the fields to update from the request body
-    const { name, number, address, price, startDate, subscriptionDuration, endDate } = req.body;
+    const { name, number, address, price, startDate, subscriptionDuration, endDate , paymentMode,dueAmount,description } = req.body;
 
     // Find the user by ID and update their information
     const updatedUser = await User.findByIdAndUpdate(
@@ -119,6 +122,9 @@ export const updateUser = async (req, res) => {
         startDate,
         subscriptionDuration,
         endDate,
+        paymentMode,
+        dueAmount,
+        description,
         updatedAt: Date.now(), // Optionally, update the 'updatedAt' field
       },
       { new: true } // Return the updated document
@@ -189,4 +195,17 @@ export const deleteUser = async (req, res) => {
     }
   };
   
+  export const getUsersWithDueAmount = async (req, res) => {
+    try {
+      // Find users whose 'dueAmount' is greater than 0
+      const users = await User.find({
+        dueAmount: { $gt: 0 }  // This ensures that 'dueAmount' is greater than 0
+      });
 
+      // Return the found users
+      res.status(200).json(users);
+    } catch (err) {
+      console.error('Error fetching users with dueAmount > 0:', err);
+      res.status(500).json({ message: 'Error fetching users with dues' });
+    }
+  };
